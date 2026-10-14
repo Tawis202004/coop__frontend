@@ -1330,7 +1330,7 @@ const StudentProfile = ({profileData,onSaved}) => {
     try {
       setSaving(true);
       setMessage("");
-      const payload = {...form, faculty: profileData?.faculty ?? "", major: profileData?.major ?? "", semester: profileData?.semester ?? ""};
+      const payload = {...form, faculty: profileData?.faculty ?? "", major: form.major ?? "", semester: profileData?.semester ?? ""};
       if (!payload.faculty || !payload.major || !payload.semester) throw new Error("ข้อมูลสำนักวิชา สาขาวิชา หรือภาคเรียนยังไม่ครบ กรุณาติดต่อผู้ประสานงาน");
       await apiService.updateStudentProfile(payload);
       await onSaved?.();
@@ -1341,9 +1341,10 @@ const StudentProfile = ({profileData,onSaved}) => {
       await showPopup(errorText, "error");
     } finally {setSaving(false);}
   };
-  return <div className="bg-white p-6 rounded-3xl border space-y-4"><h3 className="text-[#800000] font-black text-lg">โปรไฟล์ของฉัน</h3><p className="text-sm text-gray-500">สามารถแก้ไขคำนำหน้าและข้อมูลติดต่อได้ ส่วนสำนักวิชา สาขา และภาคเรียนจัดการโดยเจ้าหน้าที่</p>
+  return <div className="bg-white p-6 rounded-3xl border space-y-4"><h3 className="text-[#800000] font-black text-lg">โปรไฟล์ของฉัน</h3><p className="text-sm text-gray-500">สามารถแก้ไขคำนำหน้า สาขาวิชา และข้อมูลติดต่อได้ ส่วนสำนักวิชาและภาคเรียนจัดการโดยเจ้าหน้าที่</p>
     <div className="grid md:grid-cols-2 gap-4"><div><label className="text-sm font-bold">คำนำหน้า</label><select className="w-full p-3 rounded-xl border bg-white" value={form.title||""} onChange={e=>setForm({...form,title:e.target.value})}><option value="">เลือกคำนำหน้า</option><option value="นาย">นาย</option><option value="นางสาว">นางสาว</option></select></div>
-    {[['faculty','สำนักวิชา'],['major','สาขาวิชา'],['semester','ภาคเรียน']].map(([k,l])=><div key={k}><label className="text-sm font-bold">{l}</label><input disabled className="w-full p-3 rounded-xl border bg-gray-100" value={profileData?.[k]||"ยังไม่ระบุ"} readOnly/></div>)}
+    {[['faculty','สำนักวิชา'],['semester','ภาคเรียน']].map(([k,l])=><div key={k}><label className="text-sm font-bold">{l}</label><input disabled className="w-full p-3 rounded-xl border bg-gray-100" value={profileData?.[k]||"ยังไม่ระบุ"} readOnly/></div>)}
+    <div><label className="text-sm font-bold">สาขาวิชา</label><select className="w-full p-3 rounded-xl border bg-white" value={form.major||""} onChange={e=>setForm({...form,major:e.target.value})}><option value="">เลือกสาขาวิชา</option><option value="วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์">วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์</option><option value="วิศวกรรมเครื่องกลและหุ่นยนต์">วิศวกรรมเครื่องกลและหุ่นยนต์</option><option value="วิศวกรรมเคมีและเคมีเภสัชกรรม">วิศวกรรมเคมีและเคมีเภสัชกรรม</option><option value="วิศวกรรมปิโตรเคมีและพอลิเมอร์">วิศวกรรมปิโตรเคมีและพอลิเมอร์</option><option value="วิศวกรรมไฟฟ้า">วิศวกรรมไฟฟ้า</option><option value="วิศวกรรมโยธา">วิศวกรรมโยธา</option></select></div>
     {fields.map(([k,l])=><div key={k}><label className="text-sm font-bold">{l}</label><input className="w-full p-3 rounded-xl border" value={form[k]||""} onChange={e=>setForm({...form,[k]:e.target.value})}/></div>)}</div>
     {message&&<p role="status">{message}</p>}<button disabled={saving} onClick={save} className="px-6 py-3 bg-[#800000] text-white rounded-xl disabled:opacity-50">{saving?"กำลังบันทึก...":"บันทึกโปรไฟล์"}</button></div>;
 };
