@@ -1325,7 +1325,22 @@ const StudentProfile = ({profileData,onSaved}) => {
   const fields = [["first_name","ชื่อ"],["last_name","นามสกุล"],["phone","เบอร์โทรศัพท์"],["email","อีเมล"],["address","ที่อยู่"],["guardian_name","ชื่อผู้ปกครอง"],["guardian_phone","เบอร์ผู้ปกครอง"]];
   const [form,setForm] = useState({});const [saving,setSaving]=useState(false);const [message,setMessage]=useState("");
   useEffect(()=>{setForm({...Object.fromEntries(fields.map(([k])=>[k,profileData?.[k]||""])),title:profileData?.title||""});},[profileData]);
-  const save = async()=>{try{setSaving(true);setMessage("");await apiService.updateStudentProfile(form);setMessage("บันทึกข้อมูลสำเร็จ");await onSaved?.();}catch(e){setMessage(getApiErrorMessage(e,"บันทึกไม่สำเร็จ"));}finally{setSaving(false);}};
+  const save = async()=>{
+    if (saving) return;
+    try {
+      setSaving(true);
+      setMessage("");
+      const payload = {...form, faculty: profileData?.faculty ?? "", major: profileData?.major ?? "", semester: profileData?.semester ?? ""};
+      if (!payload.faculty || !payload.major || !payload.semester) throw new Error("ข้อมูลสำนักวิชา สาขาวิชา หรือภาคเรียนยังไม่ครบ กรุณาติดต่อผู้ประสานงาน");
+      await apiService.updateStudentProfile(payload);
+      await onSaved?.();
+      await showPopup("บันทึกข้อมูลโปรไฟล์สำเร็จ", "success");
+    } catch(e) {
+      const errorText = getApiErrorMessage(e, e?.message || "บันทึกไม่สำเร็จ");
+      setMessage(errorText);
+      await showPopup(errorText, "error");
+    } finally {setSaving(false);}
+  };
   return <div className="bg-white p-6 rounded-3xl border space-y-4"><h3 className="text-[#800000] font-black text-lg">โปรไฟล์ของฉัน</h3><p className="text-sm text-gray-500">สามารถแก้ไขคำนำหน้าและข้อมูลติดต่อได้ ส่วนสำนักวิชา สาขา และภาคเรียนจัดการโดยเจ้าหน้าที่</p>
     <div className="grid md:grid-cols-2 gap-4"><div><label className="text-sm font-bold">คำนำหน้า</label><select className="w-full p-3 rounded-xl border bg-white" value={form.title||""} onChange={e=>setForm({...form,title:e.target.value})}><option value="">เลือกคำนำหน้า</option><option value="นาย">นาย</option><option value="นางสาว">นางสาว</option></select></div>
     {[['faculty','สำนักวิชา'],['major','สาขาวิชา'],['semester','ภาคเรียน']].map(([k,l])=><div key={k}><label className="text-sm font-bold">{l}</label><input disabled className="w-full p-3 rounded-xl border bg-gray-100" value={profileData?.[k]||"ยังไม่ระบุ"} readOnly/></div>)}
