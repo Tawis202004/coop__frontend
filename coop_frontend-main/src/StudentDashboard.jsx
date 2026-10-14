@@ -3869,7 +3869,10 @@ const MainAppContainer = () => {
     "-";
 
   const displayFullName =
-    profileData?.first_name &&
+    userRole === "coordinator" &&
+    (profileData?.username || localStorage.getItem("userId")) === "mallika.kl"
+      ? "มัลลิกา เกลี้ยงเคล้า"
+      : profileData?.first_name &&
     profileData?.last_name
       ? `${profileData.first_name} ${profileData.last_name}`
       : fetchingUser
